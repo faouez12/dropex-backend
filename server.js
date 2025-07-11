@@ -1,8 +1,11 @@
+// server.js
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
 
+// Routes
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const driverRoutes = require("./routes/driverRoutes");
 const tripLogRoutes = require("./routes/tripLogRoutes");
@@ -12,11 +15,22 @@ const PORT = process.env.PORT || 5000;
 
 // ====== Middleware ======
 
-// ✅ Allow only your Vercel frontend
+// ✅ Allow Vercel frontend + Localhost frontend
+const allowedOrigins = [
+  "https://dropex-frontend.vercel.app",
+  "http://localhost:3000",
+];
+
 app.use(
   cors({
-    origin: "https://dropex-frontend.vercel.app",
-    methods: "GET,POST,PUT,DELETE",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS: " + origin));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
