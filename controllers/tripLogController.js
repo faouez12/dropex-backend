@@ -1,31 +1,32 @@
 const TripLog = require("../models/TripLog");
-const Vehicle = require("../models/Vehicle");
 
+// Add Trip Log aligned with frontend fields
 const addTripLog = async (req, res) => {
   try {
-    const { vehicleId, kilometrageToday, litresConsumed } = req.body;
+    const { branch, matricule, vehicleType, driverName, kmToday, fuelCost } =
+      req.body;
 
-    if (!vehicleId || !kilometrageToday || !litresConsumed) {
+    if (
+      !branch ||
+      !matricule ||
+      !vehicleType ||
+      !driverName ||
+      !kmToday ||
+      !fuelCost
+    ) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    const litresPer100km = (litresConsumed / kilometrageToday) * 100 || 0;
-
     const tripLog = new TripLog({
-      vehicleId,
-      kilometrageToday,
-      litresConsumed,
-      litresPer100km,
+      branch,
+      matricule,
+      vehicleType,
+      driverName,
+      kmToday,
+      fuelCost,
     });
 
     await tripLog.save();
-
-    // Optionally update the vehicle's current stats
-    await Vehicle.findByIdAndUpdate(vehicleId, {
-      kilometrageToday,
-      litresConsumed,
-      litresPer100km,
-    });
 
     res.status(201).json(tripLog);
   } catch (error) {
@@ -34,9 +35,10 @@ const addTripLog = async (req, res) => {
   }
 };
 
+// Fetch all trip logs
 const getTripLogs = async (req, res) => {
   try {
-    const logs = await TripLog.find().populate("vehicleId");
+    const logs = await TripLog.find().sort({ createdAt: -1 });
     res.json(logs);
   } catch (error) {
     console.error("Error fetching trip logs:", error);

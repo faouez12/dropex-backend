@@ -19,21 +19,27 @@ app.get("/api/test", (req, res) => {
   res.json({ message: "✅ Backend running perfectly!" });
 });
 
-// ====== MongoDB Connection ======
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
-
 // ====== API Routes ======
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/drivers", driverRoutes);
 app.use("/api/triplogs", tripLogRoutes);
 
-// ====== Start Server ======
-app.listen(PORT, () =>
-  console.log(`🚀 Server is running on http://localhost:${PORT}`)
-);
+// ====== MongoDB Connection ======
+const startServer = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ Connected to MongoDB");
+
+    app.listen(PORT, () =>
+      console.log(`🚀 Server is running on http://localhost:${PORT}`)
+    );
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1); // Exit on DB connection failure
+  }
+};
+
+startServer();
